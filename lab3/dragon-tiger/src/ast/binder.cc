@@ -131,6 +131,9 @@ void Binder::visit(Let &let) {
 }
 
 void Binder::visit(Identifier &id) {
+	VarDecl* decl = dynamic_cast<VarDecl*>( & find(id.loc, id.name) );
+	if (decl == nullptr) { utils::error(id.loc,"No Var declaration for this id");}
+	id.set_decl(decl);
 }
 
 void Binder::visit(IfThenElse &ite) {
