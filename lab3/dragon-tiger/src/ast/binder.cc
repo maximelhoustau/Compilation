@@ -131,8 +131,10 @@ void Binder::visit(Let &let) {
 }
 
 void Binder::visit(Identifier &id) {
-	VarDecl* decl = dynamic_cast<VarDecl*>( & find(id.loc, id.name) );
+	Decl& declaration = find(id.loc, id.name);
+	VarDecl* decl = dynamic_cast<VarDecl*>( &declaration );
 	if (decl == nullptr) { utils::error(id.loc,"No Var declaration for this id");}
+	enter(declaration);
 	id.set_decl(decl);
 }
 
@@ -146,6 +148,11 @@ void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
   /* ... put your code here ... */
+  std::vector<VarDecl *> & params = decl.get_params();
+  for(auto param = params.begin(); param == params.end(); param++){
+	  (*param)->accept(*this);
+  }
+  
   functions.pop_back();
 }
 
