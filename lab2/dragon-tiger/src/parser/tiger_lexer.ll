@@ -84,7 +84,9 @@ end      return yy::tiger_parser::make_END(loc);
 break    return yy::tiger_parser::make_BREAK(loc);
 function return yy::tiger_parser::make_FUNCTION(loc);
 var      return yy::tiger_parser::make_VAR(loc);
-
+if	 return yy::tiger_parser::make_IF(loc);
+then     return yy::tiger_parser::make_THEN(loc);
+else     return yy::tiger_parser::make_ELSE(loc);
  /* Identifiers */
 {id}       return yy::tiger_parser::make_ID(Symbol(yytext), loc);
 
