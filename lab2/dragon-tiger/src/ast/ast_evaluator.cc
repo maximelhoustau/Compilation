@@ -1,22 +1,6 @@
 #include "ast_evaluator.hh"
 #include "../utils/errors.hh"
 
-namespace {
-
-char const * const get_type_name(ast::Type t) {
-  switch (t) {
-    case t_int:
-      return "int";
-    case t_string:
-      return "string";
-    default:
-       utils::error("internal error: attempting to print the type of t_void or t_undef");
-  }
-}
-
-} // namespace
-
-
 namespace ast {
 
 int32_t ASTEvaluator::visit(const IntegerLiteral &literal) {
@@ -47,6 +31,7 @@ int32_t ASTEvaluator::visit(const BinaryOperator &binop) {
 	  return(a>b);
   if(op == ">=")
 	  return(a>=b);
+  return(-1);
 }
 
 int32_t ASTEvaluator::visit(const Sequence &seqExpr) {

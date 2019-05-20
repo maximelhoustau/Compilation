@@ -52,9 +52,8 @@ int main(int argc, char **argv) {
   }
 
   if (vm.count("eval")) {
-    ast::ASTEvaluator eval(&std::cout, vm.count("verbose") > 0);
+    ast::ASTEvaluator eval;
     std::cout << parser_driver.result_ast->accept(eval) << "\n";
-    eval.nl();
   }
   delete parser_driver.result_ast;
   return 0;
