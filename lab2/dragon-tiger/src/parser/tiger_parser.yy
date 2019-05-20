@@ -92,7 +92,7 @@ using utils::nl;
 %type <Decl *> decl funcDecl varDecl;
 %type <std::vector<Decl *>> decls;
 %type <Expr *> expr stringExpr seqExpr callExpr opExpr negExpr
-            assignExpr whileExpr forExpr breakExpr letExpr var intExpr;
+            assignExpr whileExpr forExpr breakExpr letExpr var intExpr stmt if_stmt;
 
 %type <std::vector<Expr *>> exprs nonemptyexprs;
 %type <std::vector<Expr *>> arguments nonemptyarguments;
@@ -136,6 +136,14 @@ expr: stringExpr { $$ = $1; }
    | breakExpr { $$ = $1; }
    | letExpr { $$ = $1; }
    | intExpr { $$ = $1; }
+;
+
+stmt: expr 
+    | if_stmt 
+;
+
+if_stmt: IF expr THEN stmt {$$ = new IfThenElse(@2, $2, $4, new Sequence(nl, std::vector<Expr *>(NULL);)); }
+      | IF expr THEN stmt ELSE stmt {$$ = new IfThenElse(@2, $2, $4, $6); }
 ;
 
 varDecl: VAR ID typeannotation ASSIGN expr
