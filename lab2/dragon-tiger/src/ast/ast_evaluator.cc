@@ -50,17 +50,16 @@ int ASTEvaluator::visit(const BinaryOperator &binop) {
 }
 
 int ASTEvaluator::visit(const Sequence &seqExpr) {
-  *ostream << "(";
-  inc();
   const auto exprs = seqExpr.get_exprs();
+  if(exprs.size() == 0)
+	  utils::error("Error: the sequence is empty");
   for (auto expr = exprs.cbegin(); expr != exprs.cend(); expr++) {
-    if (expr != exprs.cbegin())
-      *ostream << ';';
-    nl();
-    (*expr)->accept(*this);
+    if (expr != exprs.cend())
+	    return( (*expr)->accept(*this));
+    else
+	    (*expr)->accept(*this);
   }
-  dnl();
-  *ostream << ")";
+  return(-1);
 }
 
 int ASTEvaluator::visit(const IfThenElse &ite) {
