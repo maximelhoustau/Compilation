@@ -106,7 +106,7 @@ using utils::nl;
 // Declare precedence rules
 
 %nonassoc FUNCTION VAR TYPE DO OF ASSIGN;
-%left EQ NEQ LT LE GT GE;
+%nonassoc EQ NEQ LT LE GT GE;
 %left AND OR;
 %left PLUS MINUS;
 %left TIMES DIVIDE;
@@ -127,7 +127,7 @@ decl: varDecl { $$ = $1; }
 if_stmt: IF expr THEN expr elsePart {$$ = new IfThenElse(@2, $2, $4, $5); }
 ;
 
-elsePart: {$$ = new Sequence(std::vector<Expr *>); }
+elsePart: {$$ = new Sequence(nl, std::vector<Expr *>()); }
 	| ELSE expr {$$ = $2; }
 ;
 
@@ -143,6 +143,7 @@ expr: stringExpr { $$ = $1; }
    | breakExpr { $$ = $1; }
    | letExpr { $$ = $1; }
    | intExpr { $$ = $1; }
+   | if_stmt { $$ = $1; }
 ;
 
 varDecl: VAR ID typeannotation ASSIGN expr
