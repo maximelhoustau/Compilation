@@ -1,4 +1,4 @@
-#include "evaluator.hh"
+#include "ast_evaluator.hh"
 #include "../utils/errors.hh"
 
 namespace {
@@ -19,11 +19,11 @@ char const * const get_type_name(ast::Type t) {
 
 namespace ast {
 
-int ASTEvaluator::visit(const IntegerLiteral &literal) {
+int32_t ASTEvaluator::visit(const IntegerLiteral &literal) {
   return(literal.value);
 }
 
-int ASTEvaluator::visit(const BinaryOperator &binop) {
+int32_t ASTEvaluator::visit(const BinaryOperator &binop) {
   int a = binop.get_left().accept(*this);
   int b = binop.get_right().accept(*this);
   std::string op = operator_name[binop.op];
@@ -49,7 +49,7 @@ int ASTEvaluator::visit(const BinaryOperator &binop) {
 	  return(a>=b);
 }
 
-int ASTEvaluator::visit(const Sequence &seqExpr) {
+int32_t ASTEvaluator::visit(const Sequence &seqExpr) {
   const auto exprs = seqExpr.get_exprs();
   if(exprs.size() == 0)
 	  utils::error("Error: the sequence is empty");
@@ -62,20 +62,24 @@ int ASTEvaluator::visit(const Sequence &seqExpr) {
   return(-1);
 }
 
-int ASTEvaluator::visit(const IfThenElse &ite) {
-  *ostream << "if ";
-  inl();
-  ite.get_condition().accept(*this);
-  dnl();
-  *ostream << " then ";
-  inl();
-  ite.get_then_part().accept(*this);
-  dnl();
-  *ostream << " else ";
-  inl();
-  ite.get_else_part().accept(*this);
-  dec();
+int32_t ASTEvaluator::visit(const IfThenElse &ite) {
+  int cond = ite.get_condition().accept(*this);
+  if(cond == 1)
+	  return(ite.get_then_part().accept(*this));
+  else
+	  return(ite.get_else_part().accept(*this));
 }
+
+int32_t ASTEvaluator::visit(const StringLiteral &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const Let &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const Identifier &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const VarDecl &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const FunDecl &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const FunCall &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const WhileLoop &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const ForLoop &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const Break &) {utils::error("Node not implemented yet");}
+int32_t ASTEvaluator::visit(const Assign &) {utils::error("Node not implemented yet");}
 
 
 } // namespace ast
