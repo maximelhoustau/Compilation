@@ -12,11 +12,6 @@ class ASTEvaluator : public ConstASTIntVisitor {
  
 public:
   ASTEvaluator() {}
-  void nl() {
-    *ostream << std::endl;
-    for (unsigned i = 0; i < indent_level; i++)
-      *ostream << "  ";
-  };
   virtual int32_t visit(const IntegerLiteral &);
   virtual int32_t visit(const BinaryOperator &);
   virtual int32_t visit(const Sequence &);

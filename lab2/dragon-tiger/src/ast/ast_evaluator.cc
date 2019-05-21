@@ -51,8 +51,14 @@ int32_t ASTEvaluator::visit(const IfThenElse &ite) {
   int cond = ite.get_condition().accept(*this);
   if(cond == 1)
 	  return(ite.get_then_part().accept(*this));
-  else
-	  return(ite.get_else_part().accept(*this));
+  else {
+      const Expr * exprs = &ite.get_else_part();
+      Sequence * seq = (Sequence *) exprs;
+      if(seq->get_exprs().size()>0)
+        return(ite.get_else_part().accept(*this));
+      else
+        utils::error("Error: Absent else");
+    }
 }
 
 int32_t ASTEvaluator::visit(const StringLiteral &) {utils::error("Node not implemented yet");}
