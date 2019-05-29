@@ -135,6 +135,9 @@ void Binder::visit(Sequence &seq) {
 
 void Binder::visit(Let &let) {
 	push_scope();
+	//Breaks not allowed
+	parentloops.push_back(nullptr);
+
 	std::vector<Decl*> decls = let.get_decls();
 	for(int i = 0; i < (int) decls.size(); i++){
 		FunDecl* fundecl = dynamic_cast<FunDecl *>(decls[i]);
@@ -156,6 +159,8 @@ void Binder::visit(Let &let) {
 		}
 	}
 	let.get_sequence().accept(*this);
+	//Breaks back
+	parentloops.pop_back();
 	pop_scope();
 }
 
@@ -163,7 +168,10 @@ void Binder::visit(Identifier &id) {
 	Decl& declaration = find(id.loc, id.name);
 	VarDecl* decl = dynamic_cast<VarDecl*>( &declaration );
 	if (decl == nullptr) { utils::error(id.loc,"No Var declaration for this id");}
+	id.set_depth(depth);
 	id.set_decl(decl);
+	if(decl->get_depth() != depth)
+		decl->set_escapes();
 
 }
 
@@ -186,6 +194,7 @@ void Binder::visit(FunDecl &decl) {
   functions.push_back(&decl);
   /* ... put your code here ... */
 	push_scope();
+	depth++;
 	std::vector<VarDecl *> &params = decl.get_params();
 	for(int i = 0; i < (int) params.size(); i++){
 		params[i]->accept(*this);
@@ -193,6 +202,7 @@ void Binder::visit(FunDecl &decl) {
 	optional<Expr&> expr = decl.get_expr();
 	if(expr)
 		expr->accept(*this);
+	depth--;
 	functions.pop_back();
 	pop_scope();
 }
