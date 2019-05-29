@@ -230,10 +230,26 @@ void Binder::visit(ForLoop &loop) {
 }
 
 void Binder::visit(Break &b) {
+	b.set_loop(parentloops.back());
+	if(parentloops.empty() || parentloops.back())
+		error("Break is at a wrong place");
 }
 
 void Binder::visit(Assign &assign) {
+	Identifier * identifier = dynamic_cast<Identifier *>(&assign.get_lhs());
+	//Check identifiers
+	if(identifier == nullptr)
+		error(identifier->loc, "This is not an identifier");
+	identifier->accept(*this);
+	optional<VarDecl &> declaration = identifier->get_decl();
+	//Checking declaration with indices
+	for(int i = 0; i < (int) indices.size(); i++){
+		if(&*declaration == indices[i])
+			error(identifier->loc, "Impossible to assign loop variable");
+		}
+	assign.get_rhs().accept(*this);
 }
+
 
 } // namespace binder
 } // namespace ast
