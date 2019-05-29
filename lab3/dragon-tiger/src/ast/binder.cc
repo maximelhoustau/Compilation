@@ -198,12 +198,26 @@ void Binder::visit(FunDecl &decl) {
 }
 
 void Binder::visit(FunCall &call) {
+	std::vector<Expr *> &args = call.get_args();
+	for(int i = 0; i < (int) args.size(); i++){
+		args[i]->accept(*this);
+	}
+	Decl & decl = find(call.loc, call.func_name);
+	FunDecl *fundecl = dynamic_cast<FunDecl *>(&decl);
+	if(fundecl == nullptr)
+		error(call.loc, "Dunction Declaration not found");	
 }
 
+
 void Binder::visit(WhileLoop &loop) {
+	loop.get_condition().accept(*this);
+	loop.get_body().accept(*this);
 }
 
 void Binder::visit(ForLoop &loop) {
+	push_scope();
+	loop.get_variable().accept(*this);
+
 }
 
 void Binder::visit(Break &b) {
