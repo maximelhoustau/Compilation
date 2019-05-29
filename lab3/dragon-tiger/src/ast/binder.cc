@@ -218,8 +218,15 @@ void Binder::visit(WhileLoop &loop) {
 
 void Binder::visit(ForLoop &loop) {
 	push_scope();
+	// Put the loop index into indices vector
 	loop.get_variable().accept(*this);
-
+	indices.push_back(&loop.get_variable());
+	loop.get_high().accept(*this);
+	// Add new loop in parentloops vector
+	parentloops.push_back(&loop);
+	loop.get_body().accept(*this);
+	parentloops.pop_back();
+	pop_scope();
 }
 
 void Binder::visit(Break &b) {
