@@ -136,9 +136,27 @@ void Binder::visit(Sequence &seq) {
 void Binder::visit(Let &let) {
 	push_scope();
 	std::vector<Decl*> decls = let.get_decls();
-	for(Decl* decl : decls){
-		decl->accept(*this);		
+	for(int i = 0; i < (int) decls.size(); i++){
+		FunDecl* fundecl = dynamic_cast<FunDecl *>(decls[i]);
+		if(fundecl == nullptr)
+			decls[i]->accept(*this);
+		else{
+			int j = i;
+			while(fundecl != nullptr){
+				enter(*fundecl);
+				j++;
+				if( j >= (int) decls.size())
+					break;
+				fundecl = dynamic_cast<FunDecl *>(decls[j]);
+			}
+			for(int m = i; m < j; m++){
+				decls[m]->accept(*this);
+			}
+			i = j-1;
+		}
 	}
+	let.get_sequence().accept(*this);
+	pop_scope();
 }
 
 void Binder::visit(Identifier &id) {
