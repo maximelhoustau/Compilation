@@ -158,7 +158,17 @@ void Binder::visit(FunDecl &decl) {
   set_parent_and_external_name(decl);
   functions.push_back(&decl);
   /* ... put your code here ... */
-  }
+	push_scope();
+	std::vector<VarDecl *> &params = decl.get_params();
+	for(int i = 0; i < (int) params.size(); i++){
+		params[i]->accept(*this);
+	}
+	optional<Expr&> expr = decl.get_expr();
+	if(expr)
+		expr->accept(*this);
+	functions.pop_back();
+	pop_scope();
+}
 
 void Binder::visit(FunCall &call) {
 }
