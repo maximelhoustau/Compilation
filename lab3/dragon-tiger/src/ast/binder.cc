@@ -29,6 +29,7 @@ void Binder::enter(Decl &decl) {
                     decl.name.get() + " is already defined in this scope");
     error(previous->second->loc, "previous declaration was here");
   }
+  decl.set_depth(depth);
   scope[decl.name] = &decl;
 }
 
@@ -48,6 +49,7 @@ Decl &Binder::find(const location loc, const Symbol &name) {
 Binder::Binder() : scopes() {
   /* Create the top-level scope */
   push_scope();
+  depth = 0;
 
   /* Populate the top-level scope with all the primitive declarations */
   enter_primitive("print_err", "void", {"string"});
