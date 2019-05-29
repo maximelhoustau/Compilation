@@ -168,8 +168,8 @@ void Binder::visit(Identifier &id) {
 	Decl& declaration = find(id.loc, id.name);
 	VarDecl* decl = dynamic_cast<VarDecl*>( &declaration );
 	if (decl == nullptr) { utils::error(id.loc,"No Var declaration for this id");}
-	id.set_depth(depth);
 	id.set_decl(decl);
+	id.set_depth(depth);
 	if(decl->get_depth() != depth)
 		decl->set_escapes();
 
@@ -183,10 +183,9 @@ void Binder::visit(IfThenElse &ite) {
 
 void Binder::visit(VarDecl &decl) {
   optional<Expr&> expr = decl.get_expr();
-  enter(decl);
   if(expr)
 	  expr->accept(*this);
-
+  enter(decl);
 }
 
 void Binder::visit(FunDecl &decl) {
@@ -202,8 +201,8 @@ void Binder::visit(FunDecl &decl) {
 	optional<Expr&> expr = decl.get_expr();
 	if(expr)
 		expr->accept(*this);
-	depth--;
 	functions.pop_back();
+	depth--;
 	pop_scope();
 }
 
@@ -216,6 +215,8 @@ void Binder::visit(FunCall &call) {
 	FunDecl *fundecl = dynamic_cast<FunDecl *>(&decl);
 	if(fundecl == nullptr)
 		error(call.loc, "Dunction Declaration not found");	
+	call.set_depth(depth);
+	call.set_decl(fundecl);
 }
 
 
