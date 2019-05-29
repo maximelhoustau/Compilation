@@ -122,9 +122,15 @@ void Binder::visit(StringLiteral &literal) {
 }
 
 void Binder::visit(BinaryOperator &op) {
+	op.get_left().accept(*this);
+	op.get_right().accept(*this);
 }
 
 void Binder::visit(Sequence &seq) {
+	std::vector<Expr *> exprs = seq.get_exprs();
+	for(int i = 0; i < (int) exprs.size(); i++){
+		exprs[i]->accept(*this);
+	}
 }
 
 void Binder::visit(Let &let) {
