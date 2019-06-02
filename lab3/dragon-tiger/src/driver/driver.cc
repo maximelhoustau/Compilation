@@ -3,6 +3,7 @@
 
 #include "../ast/ast_dumper.hh"
 #include "../ast/binder.hh"
+#include "../ast/type_checker.hh"
 #include "../parser/parser_driver.hh"
 #include "../utils/errors.hh"
 
@@ -51,6 +52,19 @@ int main(int argc, char **argv) {
   if (vm.count("bind")) {
     ast::binder::Binder binder;
     main = binder.analyze_program(*parser_driver.result_ast);
+  }
+
+  if (vm.count("type")) {
+    ast::binder::Binder binder;
+    main = binder.analyze_program(*parser_driver.result_ast);
+    ast::type_checker::TypeChecker typer;
+    ast::ASTDumper dumper(&std::cout, vm.count("verbose") > 0);
+    if(main)
+	    main->accept(dumper);
+    else
+	    parser_driver.result_ast->accept(dumper);
+    dumper.nl();
+
   }
 
   if (vm.count("dump-ast")) {
