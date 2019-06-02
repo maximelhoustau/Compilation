@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   if (vm.count("type")) {
     ast::binder::Binder binder;
     main = binder.analyze_program(*parser_driver.result_ast);
-    ast::type_checker::TypeChecker typer;
+    //ast::type_checker::TypeChecker typer;
     ast::ASTDumper dumper(&std::cout, vm.count("verbose") > 0);
     if(main)
 	    main->accept(dumper);
