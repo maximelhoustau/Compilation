@@ -224,8 +224,8 @@ void Binder::visit(FunCall &call) {
 
 void Binder::visit(WhileLoop &loop) {
 	loop.get_condition().accept(*this);
-	loop.get_body().accept(*this);
 	parentloops.push_back(&loop);
+	loop.get_body().accept(*this);
 	parentloops.pop_back();
 }
 
