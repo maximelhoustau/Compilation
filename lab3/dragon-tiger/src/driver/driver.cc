@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   ("trace-parser", "enable parser traces")
   ("trace-lexer", "enable lexer traces")
   ("verbose,v", "be verbose")
+  ("type,t", "run the type checker on the parsed AST")
   ("input-file", po::value(&input_files), "input Tiger file");
 
   po::positional_options_description positional;
