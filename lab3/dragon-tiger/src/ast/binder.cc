@@ -243,7 +243,6 @@ void Binder::visit(ForLoop &loop) {
 }
 
 void Binder::visit(Break &b) {
-	b.set_loop(parentloops.back());
 	if(parentloops.empty() || parentloops.back() == nullptr)
 		error("Break is at a wrong place");
 	b.set_loop(parentloops.back());
