@@ -82,7 +82,10 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-  UNIMPLEMENTED();
+	//optional<VarDecl &> decl = id.get_decl();
+	llvm::Value * ptr = address_of(id);
+	return Builder.CreateLoad(ptr);
+
 }
 
 llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
@@ -96,8 +99,10 @@ llvm::Value *IRGenerator::visit(const VarDecl &decl) {
 	llvm::Value * value = nullptr;	
 	if(expr){
 		value = expr->accept(*this);
-		Builder.CreateStore(value, ptr);
+		return Builder.CreateStore(value, ptr);
 	}
+	else
+		return(nullptr);
 }
 
 llvm::Value *IRGenerator::visit(const FunDecl &decl) {
