@@ -82,7 +82,6 @@ llvm::Value *IRGenerator::visit(const Let &let) {
 }
 
 llvm::Value *IRGenerator::visit(const Identifier &id) {
-	//optional<VarDecl &> decl = id.get_decl();
 	llvm::Value * ptr = address_of(id);
 	return Builder.CreateLoad(ptr);
 
@@ -99,10 +98,12 @@ llvm::Value *IRGenerator::visit(const VarDecl &decl) {
 	llvm::Value * value = nullptr;	
 	if(expr){
 		value = expr->accept(*this);
-		return Builder.CreateStore(value, ptr);
+		Builder.CreateStore(value, ptr);
 	}
-	else
-		return(nullptr);
+	std::pair<const VarDecl*, llvm::Value*> allocation (&decl, ptr);
+	allocations.insert(allocation);
+	return(ptr);
+
 }
 
 llvm::Value *IRGenerator::visit(const FunDecl &decl) {
