@@ -92,12 +92,12 @@ llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
 llvm::Value *IRGenerator::visit(const VarDecl &decl) {
 	llvm::Type * type = llvm_type(decl.get_type());
 	llvm::Value * ptr = alloca_in_entry(type, decl.name);
-	Builder.CreateStore(decl, value);
-	optional<Expr&> expr = decl.get_expr();
+	const optional<const Expr&> expr = decl.get_expr();
 	llvm::Value * value = nullptr;	
-	if(expr)
+	if(expr){
 		value = expr->accept(*this);
-	Builder.CreateStore(value, ptr);
+		Builder.CreateStore(value, ptr);
+	}
 }
 
 llvm::Value *IRGenerator::visit(const FunDecl &decl) {
