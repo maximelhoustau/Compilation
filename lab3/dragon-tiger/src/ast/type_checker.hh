@@ -9,7 +9,7 @@ namespace type_checker {
 class TypeChecker : public ASTVisitor {
 	
 public:
-	TypeChecker();
+	TypeChecker() {};
   	virtual void visit(IntegerLiteral &);
   	virtual void visit(StringLiteral &);
   	virtual void visit(BinaryOperator &);
