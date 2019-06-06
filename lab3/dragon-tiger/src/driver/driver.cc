@@ -49,22 +49,14 @@ int main(int argc, char **argv) {
   }
 
   FunDecl *main = nullptr;
-  if (vm.count("bind")) {
+  if (vm.count("bind") || vm.count("type")) {
     ast::binder::Binder binder;
     main = binder.analyze_program(*parser_driver.result_ast);
   }
 
   if (vm.count("type")) {
-    ast::binder::Binder binder;
-    main = binder.analyze_program(*parser_driver.result_ast);
-    //ast::type_checker::TypeChecker typer;
-    ast::ASTDumper dumper(&std::cout, vm.count("verbose") > 0);
-    if(main)
-	    main->accept(dumper);
-    else
-	    parser_driver.result_ast->accept(dumper);
-    dumper.nl();
-
+   ast::type_checker::TypeChecker type_checker;
+   main->accept(type_checker);
   }
 
   if (vm.count("dump-ast")) {
