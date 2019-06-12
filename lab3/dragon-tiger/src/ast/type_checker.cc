@@ -47,7 +47,14 @@ void TypeChecker::visit(Identifier &){
 }
 
 void TypeChecker::visit(IfThenElse &ite){
-	//Type type = ite.get_condition()->get_type();
+	Type type_if = ite.get_condition().get_type();
+	Type type_then = ite.get_then_part().get_type();
+	Type type_else = ite.get_else_part().get_type();
+	if(type_if == t_int && type_then == type_else)
+		ite.set_type(type_then);
+	else
+		error("Condition isn't int or then and else part do not have the same type");
+		
 }
 
 void TypeChecker::visit(VarDecl &decl){
