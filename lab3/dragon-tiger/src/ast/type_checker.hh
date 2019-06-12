@@ -10,6 +10,7 @@ class TypeChecker : public ASTVisitor {
 	
 public:
 	TypeChecker() {};
+	Type symbol_to_type(Symbol type_s);
   	virtual void visit(IntegerLiteral &);
   	virtual void visit(StringLiteral &);
   	virtual void visit(BinaryOperator &);

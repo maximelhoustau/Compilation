@@ -1,7 +1,8 @@
 #include "type_checker.hh"
 #include "../utils/errors.hh"
 #include "../utils/nolocation.hh"
-  
+#include <string>
+
 using utils::error;
 using utils::non_fatal_error;
 
@@ -25,7 +26,9 @@ void TypeChecker::visit(BinaryOperator &op){
 
 void TypeChecker::visit(Sequence &seq){
 	std::vector<Expr *> exprs = seq.get_exprs();
-	Type type = exprs[(int)exprs.size() - 1]->get_type();
+	Expr* last_expr = exprs[(int)exprs.size()-1];
+	last_expr->accept(*this);
+	Type type = last_expr->get_type();
 	if(type != t_undef)
 		seq.set_type(type);
 	else
@@ -34,7 +37,9 @@ void TypeChecker::visit(Sequence &seq){
 
 void TypeChecker::visit(Let &let){
 	std::vector<Decl *> decls = let.get_decls();
-      	Type type = decls[(int)decls.size() - 1]->get_type();
+      	Decl* last_decl = decls[(int)decls.size()-1];
+	last_decl->accept(*this);
+	Type type = last_decl->get_type();
 	if(type != t_undef)
 		let.set_type(type);
 	else
@@ -47,8 +52,11 @@ void TypeChecker::visit(Identifier &){
 }
 
 void TypeChecker::visit(IfThenElse &ite){
+	ite.get_condition().accept(*this);
 	Type type_if = ite.get_condition().get_type();
+	ite.get_then_part().accept(*this);
 	Type type_then = ite.get_then_part().get_type();
+	ite.get_else_part().accept(*this);
 	Type type_else = ite.get_else_part().get_type();
 	if(type_if == t_int && type_then == type_else)
 		ite.set_type(type_then);
@@ -57,15 +65,34 @@ void TypeChecker::visit(IfThenElse &ite){
 		
 }
 
+Type TypeChecker::symbol_to_type(Symbol type_s){
+	std::string type = type_s.get();
+	if (type == "int")
+		return(t_int);
+	if(type == "string")
+		return(t_string);
+	if(type == "void")
+	       error("Variable cannot be void");
+	else
+		error("Type undefined");	
+}
+
 void TypeChecker::visit(VarDecl &decl){
+	decl.accept(*this);
 	optional<Expr &> expr = decl.get_expr();
 	optional<Symbol> type = decl.type_name;
-      	/*
-	if(type != t_void)
-		decl.set_type(type);
-	else
-		error("Variable declarartion must be int or string");
-	*/
+	if(type){
+		if(symbol_to_type(*type) == expr->get_type())
+			decl.set_type(expr->get_type());
+	}
+	else{
+		Type type_expr = expr->get_type();
+		if(type_expr == t_int || type_expr  == t_string)
+			decl.set_type(type_expr);
+		else
+			error("Variable type must be integer or string, not void");
+		
+	}
 }
 
 void TypeChecker::visit(FunDecl &){
