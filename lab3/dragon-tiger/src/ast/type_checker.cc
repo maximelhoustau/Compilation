@@ -149,9 +149,9 @@ void TypeChecker::visit(FunCall &funcall){
 	optional<FunDecl &> decl = funcall.get_decl();
         if(decl){
 		//Si noeud pas encore analysé recursion
-		if(decl->get_type() == t_undef)
+		//if(decl->get_type() == t_undef)
 		//	Binder::visit(decl);
-		std::vector<VarDecl *> params = decl->get_params();
+		std::vector<VarDecl *> &params = decl->get_params();
 		//Check de la taille et de la validité des affectations des parametres de la fonction
 		if((int) args.size() == (int) params.size()){
 			for(int i = 0; i < (int) args.size(); i++){
