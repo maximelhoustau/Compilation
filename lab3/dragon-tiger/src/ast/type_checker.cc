@@ -11,11 +11,13 @@ namespace ast{
 namespace type_checker{
 
 void TypeChecker::visit(IntegerLiteral &id){
+	//Int
 	id.accept(*this);
 	id.set_type(t_int);
 }
 
 void TypeChecker::visit(StringLiteral &str){
+	//String
 	str.accept(*this);
 	str.set_type(t_string);
 }
@@ -27,8 +29,10 @@ void TypeChecker::visit(BinaryOperator &op){
 	Type type_op_right = op.get_right().get_type();
 	if(type_op_left == type_op_right){
 		Operator ope = op.op;
+		//Toutes operations sont permises sur les int
 		if(type_op_left == t_int)
 			op.set_type(t_int);
+		//Seulement = <> <= >= de permis avec les strings
 		if(type_op_left == t_string && (ope == o_eq || ope == o_neq || ope == o_ge || ope == o_le))
 			op.set_type(t_string);
 		else
@@ -63,8 +67,13 @@ void TypeChecker::visit(Let &let){
 
 }
 
-void TypeChecker::visit(Identifier &){
-
+void TypeChecker::visit(Identifier &id){
+	optional<VarDecl &> decl = id.get_decl();
+	//Prend le type de sa declaration
+	if(decl)
+		id.set_type(decl->get_type());
+	else
+		error("No Declarartion for this id");
 }
 
 void TypeChecker::visit(IfThenElse &ite){
@@ -117,12 +126,15 @@ void TypeChecker::visit(FunDecl &fundecl){
 	fundecl.accept(*this);
 	optional<Expr &> expr = fundecl.get_expr();
 	optional<Symbol> type = fundecl.type_name;
+	//Si type est mentionné dans la declaration
 	if(type){
+		//Prend le type de son expr
 		if(symbol_to_type(*type) == expr->get_type())
 			fundecl.set_type(expr->get_type());
 		else
 			error("Function declaration can't have 2 different types");
 	}
+	//Sinon doit etre void
 	else{
 		Type type_expr = expr->get_type();
 		if(type_expr == t_void)
@@ -136,7 +148,11 @@ void TypeChecker::visit(FunCall &funcall){
 	std::vector<Expr *> &args = funcall.get_args();
 	optional<FunDecl &> decl = funcall.get_decl();
         if(decl){
+		//Si noeud pas encore analysé recursion
+		if(decl->get_type() == t_undef)
+		//	Binder::visit(decl);
 		std::vector<VarDecl *> params = decl->get_params();
+		//Check de la taille et de la validité des affectations des parametres de la fonction
 		if((int) args.size() == (int) params.size()){
 			for(int i = 0; i < (int) args.size(); i++){
                 		args[i]->accept(*this);
@@ -155,6 +171,7 @@ void TypeChecker::visit(WhileLoop &loop){
 	Type type_cond = loop.get_condition().get_type();
 	loop.get_body().accept(*this);
 	Type type_body = loop.get_body().get_type();
+	//Body void, condition int
 	if(type_body == t_void && type_cond == t_int)
 		loop.set_type(t_void);
 	else
@@ -168,6 +185,7 @@ void TypeChecker::visit(ForLoop &loop){
 	Type type_high = loop.get_high().get_type();
 	loop.get_body().accept(*this);
 	Type type_body = loop.get_body().get_type();
+	//indices et variable d'arret entiers, body void
 	if(type_var == t_int && type_high == t_int && type_body == t_void)
 		loop.set_type(t_void);
 	else
@@ -180,8 +198,19 @@ void TypeChecker::visit(Break &br){
 	br.set_type(t_void);
 }
 
-void TypeChecker::visit(Assign &){
-
+void TypeChecker::visit(Assign &assign){
+	Identifier * identifier = dynamic_cast<Identifier *>(&assign.get_lhs());
+        if(identifier == nullptr)
+                error(identifier->loc, "This is not an identifier");
+        identifier->accept(*this);
+        Type type_l = identifier->get_decl()->get_type();
+        assign.get_rhs().accept(*this);
+	Type type_r = assign.get_rhs().get_type();
+	//Verification des types de l'assignement
+	if(type_l == type_r)
+		assign.set_type(t_void);
+	else
+		error("Declaration and assignement do not have the same type");
 }
 
 
