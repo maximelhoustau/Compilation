@@ -113,12 +113,41 @@ void TypeChecker::visit(VarDecl &decl){
 	}
 }
 
-void TypeChecker::visit(FunDecl &){
-
+void TypeChecker::visit(FunDecl &fundecl){
+	fundecl.accept(*this);
+	optional<Expr &> expr = fundecl.get_expr();
+	optional<Symbol> type = fundecl.type_name;
+	if(type){
+		if(symbol_to_type(*type) == expr->get_type())
+			fundecl.set_type(expr->get_type());
+		else
+			error("Function declaration can't have 2 different types");
+	}
+	else{
+		Type type_expr = expr->get_type();
+		if(type_expr == t_void)
+			fundecl.set_type(t_void);
+		else
+			error("Expression is not void in the function declarartion");
+	}
 }
 
-void TypeChecker::visit(FunCall &){
-
+void TypeChecker::visit(FunCall &funcall){
+	std::vector<Expr *> &args = funcall.get_args();
+	optional<FunDecl &> decl = funcall.get_decl();
+        if(decl){
+		std::vector<VarDecl *> params = decl->get_params();
+		if((int) args.size() == (int) params.size()){
+			for(int i = 0; i < (int) args.size(); i++){
+                		args[i]->accept(*this);
+				if(!(args[i]->get_type() == params[i]->get_type()))
+					error("Parameter and argument do not have the same type");
+			}
+			funcall.set_type(decl->get_type());
+       		}
+	}
+	else
+		error("No declaration for this function");
 }
 
 void TypeChecker::visit(WhileLoop &loop){
@@ -132,8 +161,17 @@ void TypeChecker::visit(WhileLoop &loop){
 		error("While loops must have a voided body and an integer condition");
 }
 
-void TypeChecker::visit(ForLoop &){
-
+void TypeChecker::visit(ForLoop &loop){
+	loop.get_variable().accept(*this);
+	Type type_var = loop.get_variable().get_type();
+	loop.get_high().accept(*this);
+	Type type_high = loop.get_high().get_type();
+	loop.get_body().accept(*this);
+	Type type_body = loop.get_body().get_type();
+	if(type_var == t_int && type_high == t_int && type_body == t_void)
+		loop.set_type(t_void);
+	else
+		error("Index and bounds must be integers, and body is voided");
 }
 
 void TypeChecker::visit(Break &br){
