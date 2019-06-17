@@ -12,41 +12,46 @@ namespace type_checker{
 
 void TypeChecker::visit(IntegerLiteral &id){
 	//Int
-	id.accept(*this);
+	//std::cerr << "Visit Integer" << "\n";
 	id.set_type(t_int);
 }
 
 void TypeChecker::visit(StringLiteral &str){
+	//std::cerr << "Visit String" << "\n";
 	//String
-	str.accept(*this);
 	str.set_type(t_string);
 }
 
 void TypeChecker::visit(BinaryOperator &op){
+	//std::cerr << "Visit BinOp" << "\n";
 	op.get_left().accept(*this);
 	Type type_op_left = op.get_left().get_type();
-        op.get_right().accept(*this);	
+	op.get_right().accept(*this);	
 	Type type_op_right = op.get_right().get_type();
-	if(type_op_left == type_op_right){
+       	if(type_op_left == type_op_right){
 		Operator ope = op.op;
 		//Toutes operations sont permises sur les int
-		if(type_op_left == t_int)
+		if(type_op_left == t_int){
 			op.set_type(t_int);
+		}
 		//Seulement = <> <= >= de permis avec les strings
-		if(type_op_left == t_string && (ope == o_eq || ope == o_neq || ope == o_ge || ope == o_le))
+		else if(type_op_left == t_string && (ope == o_eq || ope == o_neq || ope == o_ge || ope == o_le))
 			op.set_type(t_string);
 		else
-			error("Operation not permitted with srings");
+			error("Operation not permitted with strings");
 	}
 	else
 		error("Operation of two different type objects");
 }
 
 void TypeChecker::visit(Sequence &seq){
+	//std::cerr << "Visit Sequence" << "\n";
 	//Prend le type de la derniere expr
 	std::vector<Expr *> exprs = seq.get_exprs();
+	for(int i = 0; i < (int) exprs.size(); i++){
+                exprs[i]->accept(*this);
+        }
 	Expr* last_expr = exprs[(int)exprs.size()-1];
-	last_expr->accept(*this);
 	Type type = last_expr->get_type();
 	if(type != t_undef)
 		seq.set_type(type);
@@ -55,11 +60,15 @@ void TypeChecker::visit(Sequence &seq){
 }
 
 void TypeChecker::visit(Let &let){
+	//std::cerr << "Visit Let" << "\n";
 	//Prend le type de la derniere expr
 	std::vector<Decl *> decls = let.get_decls();
-      	Decl* last_decl = decls[(int)decls.size()-1];
-	last_decl->accept(*this);
-	Type type = last_decl->get_type();
+	Sequence &seq = let.get_sequence();
+	for(int i = 0; i < (int) decls.size(); i++){
+              decls[i]->accept(*this); 
+        }
+        seq.accept(*this);
+	Type type = seq.get_type();
 	if(type != t_undef)
 		let.set_type(type);
 	else
@@ -68,12 +77,15 @@ void TypeChecker::visit(Let &let){
 }
 
 void TypeChecker::visit(Identifier &id){
+	//std::cerr << "Visit Identifier" << "\n";
 	optional<VarDecl &> decl = id.get_decl();
 	//Prend le type de sa declaration
-	if(decl)
+	if(decl){
+		std::cerr << decl->get_type() << "\n";
 		id.set_type(decl->get_type());
+	}
 	else
-		error("No Declarartion for this id");
+		error("No Declaration for this id");
 }
 
 void TypeChecker::visit(IfThenElse &ite){
@@ -98,18 +110,25 @@ Type TypeChecker::symbol_to_type(Symbol type_s){
 	if(type == "string")
 		return(t_string);
 	if(type == "void")
-	       error("Variable cannot be void");
+		return(t_void);
 	else
 		error("Type undefined");	
 }
 
 void TypeChecker::visit(VarDecl &decl){
-	decl.accept(*this);
+	//std::cerr << "Visit VarDecl" << "\n";
 	optional<Expr &> expr = decl.get_expr();
 	optional<Symbol> type = decl.type_name;
+	if(expr)	
+		expr->accept(*this);
+	else
+		error("Expression invalid");
+	
 	//Type défini, on vérifie que le type déclaré est le meme que le type de la variable
 	if(type){
-		if(symbol_to_type(*type) == expr->get_type())
+		if(symbol_to_type(*type) == t_void)
+			error("Variable cannot be void");
+		else if(symbol_to_type(*type) == expr->get_type())
 			decl.set_type(expr->get_type());
 	}
 	//Type non défini, on attribue le type de la variable
@@ -122,42 +141,57 @@ void TypeChecker::visit(VarDecl &decl){
 	}
 }
 
-void TypeChecker::visit(FunDecl &fundecl){
-	fundecl.accept(*this);
+void TypeChecker::visit(FunDecl &fundecl){	
+	//std::cerr << "Visit FunDecl" << "\n";
 	optional<Expr &> expr = fundecl.get_expr();
 	optional<Symbol> type = fundecl.type_name;
-	//Si type est mentionné dans la declaration
-	if(type){
-		//Prend le type de son expr
-		if(symbol_to_type(*type) == expr->get_type())
-			fundecl.set_type(expr->get_type());
-		else
-			error("Function declaration can't have 2 different types");
+	if(expr){
+		expr->accept(*this);
+		//Si type est mentionné dans la declaration
+          	if(type){
+                  //Prend le type de son expr
+                	if(symbol_to_type(*type) == expr->get_type())
+                        	fundecl.set_type(expr->get_type());
+                  	else
+                          	error("Function declaration can't have 2 different types");
+          	}
+          	//Sinon doit etre void
+          	else{
+                	Type type_expr = expr->get_type();
+                  	if(type_expr == t_void)
+                          	fundecl.set_type(t_void);
+                  	else
+                          	error("Expression is not void in the function declaration");
+          	}
 	}
-	//Sinon doit etre void
+
 	else{
-		Type type_expr = expr->get_type();
-		if(type_expr == t_void)
-			fundecl.set_type(t_void);
+		//Fonction primitive
+		if(fundecl.is_external){
+			if(type)
+				fundecl.set_type(symbol_to_type(*type));
+		}
 		else
-			error("Expression is not void in the function declarartion");
+			error("Expression incorrect");
 	}
 }
 
 void TypeChecker::visit(FunCall &funcall){
+	//std::cerr << "Visit FunCall" << "\n";
 	std::vector<Expr *> &args = funcall.get_args();
 	optional<FunDecl &> decl = funcall.get_decl();
         if(decl){
 		//Si noeud pas encore analysé recursion
-		//if(decl->get_type() == t_undef)
-		//	Binder::visit(decl);
+		if(decl->get_type() == t_undef){
+			decl->accept(*this);
+		}
 		std::vector<VarDecl *> &params = decl->get_params();
 		//Check de la taille et de la validité des affectations des parametres de la fonction
 		if((int) args.size() == (int) params.size()){
 			for(int i = 0; i < (int) args.size(); i++){
-                		args[i]->accept(*this);
 				if(!(args[i]->get_type() == params[i]->get_type()))
 					error("Parameter and argument do not have the same type");
+				
 			}
 			funcall.set_type(decl->get_type());
        		}
@@ -194,11 +228,11 @@ void TypeChecker::visit(ForLoop &loop){
 
 void TypeChecker::visit(Break &br){
 	//Breaks sont void
-	br.accept(*this);
 	br.set_type(t_void);
 }
 
 void TypeChecker::visit(Assign &assign){
+	std::cerr << "Visit Assign" << "\n";
 	Identifier * identifier = dynamic_cast<Identifier *>(&assign.get_lhs());
         if(identifier == nullptr)
                 error(identifier->loc, "This is not an identifier");
