@@ -159,33 +159,32 @@ void TypeChecker::visit(FunDecl &fundecl){
                   //Prend le type de son expr
                 	if(symbol_to_type(*type) == t_void)
                         	error("Variable cannot be void");
-                	 if(symbol_to_type(*type) == expr->get_type())
-                        	fundecl.set_type(expr->get_type());
-                  	else
-                          	error("Function declaration can't have 2 different types");
+                        fundecl.set_type(expr->get_type());
           	}
           	//Sinon doit etre void
           	else{
                 	Type type_expr = expr->get_type();
-                  	if(type_expr == t_void)
-				error("Expression is not void in the function declaration");
-			fundecl.set_type(type_expr);
+                  	if(type_expr != t_void)
+				error("Function with no explicit type should be void declared");
+			fundecl.set_type(t_void);
           	}
 	}
 
-	else{
-		if(symbol_to_type(*type) == t_int)
-			fundecl.set_type(t_int);
-		if(symbol_to_type(*type) == t_string)
-			fundecl.set_type(t_string);
+	else{		
 		//Fonction primitive
 		if(fundecl.is_external){
 			if(type)
 				fundecl.set_type(symbol_to_type(*type));
 		}
-		else
-			error("Expression incorrect");
+		else {
+			if(type){
+				if(symbol_to_type(*type) != t_void)
+					error("Expression incorrect");
+				fundecl.set_type(t_void);
+			}		
+		}
 	}
+	fundecl_stack.pop_back();
 }
 
 void TypeChecker::visit(FunCall &funcall){
