@@ -195,6 +195,8 @@ void TypeChecker::visit(FunCall &funcall){
 			}
 			funcall.set_type(decl->get_type());
        		}
+		else
+			error("Wrong number of arguments");
 	}
 	else
 		error("No declaration for this function");
