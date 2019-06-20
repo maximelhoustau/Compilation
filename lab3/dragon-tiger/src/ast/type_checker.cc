@@ -48,15 +48,14 @@ void TypeChecker::visit(Sequence &seq){
 	//std::cerr << "Visit Sequence" << "\n";
 	//Prend le type de la derniere expr
 	std::vector<Expr *> exprs = seq.get_exprs();
+	Type type = t_void;
 	for(int i = 0; i < (int) exprs.size(); i++){
                 exprs[i]->accept(*this);
         }
 	Expr* last_expr = exprs[(int)exprs.size()-1];
-	Type type = last_expr->get_type();
-	if(type != t_undef)
-		seq.set_type(type);
-	else
-		seq.set_type(t_void);
+	if(last_expr)
+		type = last_expr->get_type();
+	seq.set_type(type);
 }
 
 void TypeChecker::visit(Let &let){
