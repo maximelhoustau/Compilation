@@ -188,12 +188,16 @@ void TypeChecker::visit(FunCall &funcall){
 		std::vector<VarDecl *> &params = decl->get_params();
 		//Check de la taille et de la validité des affectations des parametres de la fonction
 		if((int) args.size() == (int) params.size()){
-			for(int i = 0; i < (int) args.size(); i++){
-				if(!(args[i]->get_type() == params[i]->get_type()))
-					error("Parameter and argument do not have the same type");
+			if(params.empty())
+				funcall.set_type(decl->get_type());
+			else {
+				for(int i = 0; i < (int) args.size(); i++){
+					if(!(args[i]->get_type() == params[i]->get_type()))
+						error("Parameter and argument do not have the same type");
 				
-			}
+				}
 			funcall.set_type(decl->get_type());
+			}
        		}
 		else
 			error("Wrong number of arguments");
