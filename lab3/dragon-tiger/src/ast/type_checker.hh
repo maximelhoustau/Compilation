@@ -7,7 +7,7 @@ namespace ast {
 namespace type_checker {
 
 class TypeChecker : public ASTVisitor {
-	
+	std::vector<FunDecl *> fundecl_stack;	
 public:
 	TypeChecker() {};
 	Type symbol_to_type(Symbol type_s);

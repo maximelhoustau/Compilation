@@ -177,33 +177,34 @@ void TypeChecker::visit(FunDecl &fundecl){
 }
 
 void TypeChecker::visit(FunCall &funcall){
+	FunDecl *decl = &*funcall.get_decl();
+    	int stack_size = fundecl_stack.size();
+    	for (int i = 0 ; i < stack_size ; i++) {
+        	FunDecl *fundecl_tmp = fundecl_stack[i];
+        	if (decl == fundecl_tmp) {
+            		funcall.set_type(decl->get_type());
+            	return;
+        	}
+    	}
+	//Si noeud pas encore analysé recursion
+    	if (decl->get_type() == t_undef){
+       	 	decl->accept(*this);
+    	}
+
 	//std::cerr << "Visit FunCall" << "\n";
 	std::vector<Expr *> &args = funcall.get_args();
-	optional<FunDecl &> decl = funcall.get_decl();
-        if(decl){
-		//Si noeud pas encore analysé recursion
-		if(decl->get_type() == t_undef){
-			decl->accept(*this);
-		}
-		std::vector<VarDecl *> &params = decl->get_params();
-		//Check de la taille et de la validité des affectations des parametres de la fonction
-		if((int) args.size() == (int) params.size()){
-			if(params.empty())
-				funcall.set_type(decl->get_type());
-			else {
-				for(int i = 0; i < (int) args.size(); i++){
-					if(!(args[i]->get_type() == params[i]->get_type()))
-						error("Parameter and argument do not have the same type");
-				
-				}
-			funcall.set_type(decl->get_type());
-			}
-       		}
-		else
-			error("Wrong number of arguments");
+	std::vector<VarDecl *> &params = decl->get_params();
+	//Check de la taille et de la validité des affectations des parametres de la fonction
+	if((int) args.size() != (int) params.size())
+		error("Wrong number of arguments");
+
+	for(int i = 0; i < (int) args.size(); i++){
+		args[i]->accept(*this);
+		if(args[i]->get_type() != params[i]->get_type())
+			error("Parameter and argument do not have the same type");
 	}
-	else
-		error("No declaration for this function");
+	funcall.set_type(decl->get_type());
+	
 }
 
 void TypeChecker::visit(WhileLoop &loop){
