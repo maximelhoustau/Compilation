@@ -142,6 +142,13 @@ void TypeChecker::visit(VarDecl &decl){
 }
 
 void TypeChecker::visit(FunDecl &fundecl){	
+	fundecl_stack.push_back(&fundecl);
+	if (fundecl.get_type() != t_undef) return;
+	std::vector<VarDecl *> & params = fundecl.get_params();
+    	for(int i = 0 ; i < (int) params.size() ; i++) {
+        	params[i]->accept(*this);
+    	}
+
 	//std::cerr << "Visit FunDecl" << "\n";
 	optional<Expr &> expr = fundecl.get_expr();
 	optional<Symbol> type = fundecl.type_name;
