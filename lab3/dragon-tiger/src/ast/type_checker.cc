@@ -131,6 +131,8 @@ void TypeChecker::visit(VarDecl &decl){
 			error("Variable cannot be void");
 		else if(symbol_to_type(*type) == expr->get_type())
 			decl.set_type(expr->get_type());
+		else
+			error("Declaration and expression must have the same type");
 	}
 	//Type non défini, on attribue le type de la variable
 	else{
