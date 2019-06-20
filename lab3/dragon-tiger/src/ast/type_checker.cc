@@ -30,15 +30,10 @@ void TypeChecker::visit(BinaryOperator &op){
 	Type type_op_right = op.get_right().get_type();
        	if(type_op_left == type_op_right){
 		Operator ope = op.op;
-		//Toutes operations sont permises sur les int
-		if(type_op_left == t_int){
-			op.set_type(t_int);
-		}
-		//Seulement = <> <= >= de permis avec les strings
-		if(type_op_left == t_string && (ope == o_eq || ope == o_neq || ope == o_ge || ope == o_le || ope == o_lt || ope == o_gt))
-			op.set_type(t_int);
-		else
+		//Seulement comparaison de permis avec les strings
+		if(type_op_left == t_string && (ope == o_plus || ope == o_minus || ope == o_divide || ope == o_times))
 			error("Operation not permitted with strings");
+		op.set_type(t_int);
 	}
 	else
 		error("Operation of two different type objects");
