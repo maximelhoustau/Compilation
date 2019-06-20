@@ -33,6 +33,8 @@ void TypeChecker::visit(BinaryOperator &op){
 		//Seulement comparaison de permis avec les strings
 		if(type_op_left == t_string && (ope == o_plus || ope == o_minus || ope == o_divide || ope == o_times))
 			error("Operation not permitted with strings");
+		if(type_op_left == t_void || type_op_left == t_undef)
+			error("Operation not permitted between void objects");
 		op.set_type(t_int);
 	}
 	else
