@@ -53,7 +53,7 @@ void TypeChecker::visit(Sequence &seq){
                 exprs[i]->accept(*this);
         }
 	Expr* last_expr = exprs[(int)exprs.size()-1];
-	if(last_expr != NULL)
+	if(exprs.size() == 0)
 		type = last_expr->get_type();
 	seq.set_type(type);
 }
