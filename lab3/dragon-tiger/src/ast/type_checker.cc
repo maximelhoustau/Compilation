@@ -35,7 +35,7 @@ void TypeChecker::visit(BinaryOperator &op){
 			op.set_type(t_int);
 		}
 		//Seulement = <> <= >= de permis avec les strings
-		if(type_op_left == t_string && (ope == o_eq || ope == o_neq || ope == o_ge || ope == o_le))
+		if(type_op_left == t_string && (ope == o_eq || ope == o_neq || ope == o_ge || ope == o_le || ope == o_lt || ope == o_gt))
 			op.set_type(t_int);
 		else
 			error("Operation not permitted with strings");
