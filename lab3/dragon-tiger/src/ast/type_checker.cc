@@ -150,7 +150,9 @@ void TypeChecker::visit(FunDecl &fundecl){
 		//Si type est mentionné dans la declaration
           	if(type){
                   //Prend le type de son expr
-                	if(symbol_to_type(*type) == expr->get_type())
+                	if(symbol_to_type(*type) == t_void)
+                        	error("Variable cannot be void");
+                	 if(symbol_to_type(*type) == expr->get_type())
                         	fundecl.set_type(expr->get_type());
                   	else
                           	error("Function declaration can't have 2 different types");
@@ -159,13 +161,16 @@ void TypeChecker::visit(FunDecl &fundecl){
           	else{
                 	Type type_expr = expr->get_type();
                   	if(type_expr == t_void)
-                          	fundecl.set_type(t_void);
-                  	else
-                          	error("Expression is not void in the function declaration");
+				error("Expression is not void in the function declaration");
+			fundecl.set_type(type_expr);
           	}
 	}
 
 	else{
+		if(symbol_to_type(*type) == t_int)
+			fundecl.set_type(t_int);
+		if(symbol_to_type(*type) == t_string)
+			fundecl.set_type(t_string);
 		//Fonction primitive
 		if(fundecl.is_external){
 			if(type)
