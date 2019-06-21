@@ -149,37 +149,35 @@ void TypeChecker::visit(FunDecl &fundecl){
     	}
 	optional<Expr &> expr = fundecl.get_expr();
 	optional<Symbol> type = fundecl.type_name;
-	if(expr){
-		//Si type est mentionné dans la declaration
-          	if(type){
-                        fundecl.set_type(expr->get_type());
-                  	//Prend le type de son expr
-                	if(symbol_to_type(*type) == t_void)
-                        	error("Variable cannot be void");
-                	if(symbol_to_type(*type) != expr->get_type())
-				error("Type declaration mismatch");
-          	}
-          	//Sinon doit etre void
-          	else if (!type){
-			fundecl.set_type(t_void);
-			Type type_expr = expr->get_type();
-                  	if(type_expr != t_void)
-				error("Function with no explicit type should be void declared");
-          	}
-		expr->accept(*this);
-	}
-	else{		
-		//Fonction primitive
+	if(type){
+		if(expr){
+			fundecl.set_type(expr->get_type());
+			expr->accept(*this);
+                        //Prend le type de son expr
+                        if(symbol_to_type(*type) == t_void)
+                                error("Variable cannot be void");
+                        if(symbol_to_type(*type) != expr->get_type())
+                                error("Type declaration mismatch");
+		}
 		if(fundecl.is_external){
-			fundecl.set_type(symbol_to_type(*type));
-		}
+                          fundecl.set_type(symbol_to_type(*type));
+                  }
 		else {
-			if(type){
-				if(symbol_to_type(*type) != t_void)
-					error("Expression incorrect");
-			fundecl.set_type(t_void);		
-			}
+			if(symbol_to_type(*type) != t_void)
+				error("Expression incorrect");
+                          fundecl.set_type(t_void);
 		}
+	}
+	else{
+		if(expr){
+			fundecl.set_type(t_void);
+			expr->accept(*this);
+                        Type type_expr = expr->get_type();
+                        if(type_expr != t_void)
+                                error("Function with no explicit type should be void declared");
+		}
+		else
+			error("Error");
 	}
 }
 
