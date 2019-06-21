@@ -144,43 +144,43 @@ void TypeChecker::visit(VarDecl &decl){
 void TypeChecker::visit(FunDecl &fundecl){	
  //std::cerr <<  "visit FunDecl\n";
     /* store this declaration to detect recursive funcitons */
-    recursive_funDecl_stack.push_back(&decl);
+    fundecl_stack.push_back(&fundecl);
     /* if this function has been visited already by a funcall */
-    if (decl.get_type() != t_undef) return;
+    if (fundecl.get_type() != t_undef) return;
     /* visit parameters */
-    std::vector<VarDecl *> & vars = decl.get_params();
+    std::vector<VarDecl *> & vars = fundecl.get_params();
     int n = vars.size();
     for(int i = 0 ; i < n ; i++) {
         vars[i]->accept(*this);
     }
     /* visit expression and check if it match the explicit
      * paramter if any */
-    optional<Symbol> type_name = decl.type_name;
-    optional<Expr &> expr = decl.get_expr();
+    optional<Symbol> type_name = fundecl.type_name;
+    optional<Expr &> expr = fundecl.get_expr();
     if(expr && type_name) {
-        decl.set_type(symbol_to_type(*type_name));
+        fundecl.set_type(symbol_to_type(*type_name));
         expr->accept(*this);
         if(symbol_to_type(*type_name) == t_void)
-            error(decl.loc, "explicit void type name is disallowed in non-primitive function declaration");
+            error(fundecl.loc, "explicit void type name is disallowed in non-primitive function declaration");
         if (symbol_to_type(*type_name) != expr->get_type())
-            error(decl.loc, "mismatch type declaration");
+            error(fundecl.loc, "mismatch type declaration");
     } else if (expr && !type_name) {
-        decl.set_type(t_void);
+        fundecl.set_type(t_void);
         expr->accept(*this);
         if (expr->get_type() != t_void)
-            error(decl.loc, "function with no explicit type must be void");
+            error(fundecl.loc, "function with no explicit type must be void");
     } else {
-        if (decl.is_external) {
+        if (fundecl.is_external) {
             /* accept the type of a non primitive declaration without
              * visiting his expression (which is nullptr) */
-            decl.set_type(symbol_to_type(*type_name));
+            fundecl.set_type(symbol_to_type(*type_name));
         } else if (type_name) {
             if (symbol_to_type(*type_name) != t_void)
-                error(decl.loc, "function type mismatch");
-            decl.set_type(t_void);
+                error(fundecl.loc, "function type mismatch");
+            fundecl.set_type(t_void);
 }
     }
-    recursive_funDecl_stack.pop_back();
+    fundecl_stack.pop_back();
 }
 
 
