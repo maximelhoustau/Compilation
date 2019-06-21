@@ -206,14 +206,12 @@ void TypeChecker::visit(FunCall &funcall){
 	//Check de la taille et de la validité des affectations des parametres de la fonction
 	if((int) args.size() != (int) params.size())
 		error("Wrong number of arguments");
-
-	for(int i = 0; i < (int) args.size(); i++){
-		args[i]->accept(*this);
-		if(args[i]->get_type() != params[i]->get_type())
-			error("Parameter and argument do not have the same type");
-	}
-	funcall.set_type(decl->get_type());
-	
+ 	for (int i = 0 ; i < (int) args.size() ; i++){
+        	args[i]->accept(*this);
+      	  	if (args[i]->get_type() != params[i]->get_type())
+            		error("Parameter declaration error");
+    		}
+    	funcall.set_type(decl->get_type());
 }
 
 void TypeChecker::visit(WhileLoop &loop){
