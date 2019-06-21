@@ -152,23 +152,23 @@ void TypeChecker::visit(FunDecl &fundecl){
 	//std::cerr << "Visit FunDecl" << "\n";
 	optional<Expr &> expr = fundecl.get_expr();
 	optional<Symbol> type = fundecl.type_name;
-	if(expr){
+	if(expr && type){
+		//Prend le type de son expr
+                if(symbol_to_type(*type) == t_void)
+                        error("Variable cannot be void");
+                if(symbol_to_type(*type) != expr->get_type())
+			error("Wrong type declaration");        
+		fundecl.set_type(expr->get_type());
 		expr->accept(*this);
-		//Si type est mentionné dans la declaration
-          	if(type){
-                  //Prend le type de son expr
-                	if(symbol_to_type(*type) == t_void)
-                        	error("Variable cannot be void");
-                        fundecl.set_type(expr->get_type());
           	}
           	//Sinon doit etre void
-          	else{
-                	Type type_expr = expr->get_type();
-                  	if(type_expr != t_void)
-				error("Function with no explicit type should be void declared");
-			fundecl.set_type(t_void);
+          else if (expr && !(type)){
+                Type type_expr = expr->get_type();
+                if(type_expr != t_void)		
+			error("Function with no explicit type should be void declared");
+		fundecl.set_type(t_void);
+		expr->accept(*this);
           	}
-	}
 
 	else{		
 		//Fonction primitive
@@ -176,7 +176,7 @@ void TypeChecker::visit(FunDecl &fundecl){
 			if(type)
 				fundecl.set_type(symbol_to_type(*type));
 		}
-		else {
+		else{
 			if(type){
 				if(symbol_to_type(*type) != t_void)
 					error("Expression incorrect");
@@ -189,9 +189,8 @@ void TypeChecker::visit(FunDecl &fundecl){
 
 void TypeChecker::visit(FunCall &funcall){
 	FunDecl *decl = &*funcall.get_decl();
-    	int stack_size = fundecl_stack.size();
-    	for (int i = 0 ; i < stack_size ; i++) {
-        	FunDecl *fundecl_tmp = fundecl_stack[i];
+    	for (int i = 0 ; i < (int) fundecl_stack.size() ; i++) {
+        	FunDecl * fundecl_tmp = fundecl_stack[i];
         	if (decl == fundecl_tmp) {
             		funcall.set_type(decl->get_type());
             	return;
