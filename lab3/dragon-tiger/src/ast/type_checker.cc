@@ -142,18 +142,14 @@ void TypeChecker::visit(VarDecl &decl){
 }
 
 void TypeChecker::visit(FunDecl &fundecl){	
-	fundecl_stack.push_back(&fundecl);
 	if (fundecl.get_type() != t_undef) return;
 	std::vector<VarDecl *> & params = fundecl.get_params();
     	for(int i = 0 ; i < (int) params.size() ; i++) {
         	params[i]->accept(*this);
     	}
-
-	//std::cerr << "Visit FunDecl" << "\n";
 	optional<Expr &> expr = fundecl.get_expr();
 	optional<Symbol> type = fundecl.type_name;
 	if(expr){
-		expr->accept(*this);
 		//Si type est mentionné dans la declaration
           	if(type){
                         fundecl.set_type(expr->get_type());
@@ -170,8 +166,8 @@ void TypeChecker::visit(FunDecl &fundecl){
                   	if(type_expr != t_void)
 				error("Function with no explicit type should be void declared");
           	}
+		expr->accept(*this);
 	}
-
 	else{		
 		//Fonction primitive
 		if(fundecl.is_external){
@@ -184,7 +180,6 @@ void TypeChecker::visit(FunDecl &fundecl){
 			fundecl.set_type(t_void);		
 			}
 		}
-	fundecl_stack.pop_back();
 	}
 }
 
