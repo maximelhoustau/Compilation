@@ -194,7 +194,7 @@ void TypeChecker::visit(FunCall &funcall){
         	FunDecl *fundecl_tmp = fundecl_stack[i];
         	if (decl == fundecl_tmp) {
             		funcall.set_type(decl->get_type());
-            	return;
+			return;
         	}
     	}
 	//Si noeud pas encore analysé recursion
@@ -212,7 +212,7 @@ void TypeChecker::visit(FunCall &funcall){
         	args[i]->accept(*this);
       	  	if (args[i]->get_type() != params[i]->get_type())
             		error("Parameter declaration error");
-    		}
+    	}
     	funcall.set_type(decl->get_type());
 }
 
