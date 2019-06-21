@@ -141,45 +141,45 @@ void TypeChecker::visit(VarDecl &decl){
 	}
 }
 
-void TypeChecker::visit(FunDecl &fundecl){	
-	if (fundecl.get_type() != t_undef) return;
-	std::vector<VarDecl *> & params = fundecl.get_params();
-    	for(int i = 0 ; i < (int) params.size() ; i++) {
-        	params[i]->accept(*this);
-    	}
-	optional<Expr &> expr = fundecl.get_expr();
-	optional<Symbol> type = fundecl.type_name;
-	if(type){
-		if(expr){
-			fundecl.set_type(expr->get_type());
-			expr->accept(*this);
-                        //Prend le type de son expr
-                        if(symbol_to_type(*type) == t_void)
-                                error("Variable cannot be void");
-                        if(symbol_to_type(*type) != expr->get_type())
-                                error("Type declaration mismatch");
-		}
-		if(fundecl.is_external){
-                          fundecl.set_type(symbol_to_type(*type));
-                  }
-		else {
-			if(symbol_to_type(*type) != t_void)
-				error("Expression incorrect");
-                          fundecl.set_type(t_void);
-		}
-	}
-	else{
-		if(expr){
-			fundecl.set_type(t_void);
-			expr->accept(*this);
-                        Type type_expr = expr->get_type();
-                        if(type_expr != t_void)
-                                error("Function with no explicit type should be void declared");
-		}
-		else
-			error("Error");
-	}
+void TypeChecker::visit(FunDecl &decl){	
+ //std::cerr <<  "visit FunDecl\n";
+    /* if this function has been visited already by a funcall */
+    if (decl.get_type() != t_undef) return;
+    /* visit parameters */
+    std::vector<VarDecl *> & vars = decl.get_params();
+    int n = vars.size();
+    for(int i = 0 ; i < n ; i++) {
+        vars[i]->accept(*this);
+    }
+    /* visit expression and check if it match the explicit
+     * paramter if any */
+    optional<Symbol> type_name = decl.type_name;
+    optional<Expr &> expr = decl.get_expr();
+    if(expr && type_name) {
+        decl.set_type(symbol_to_type(*type_name));
+        expr->accept(*this);
+        if(symbol_to_type(*type_name) == t_void)
+            error(decl.loc, "explicit void type name is disallowed in non-primitive function declaration");
+        if (symbol_to_type(*type_name) != expr->get_type())
+            error(decl.loc, "mismatch type declaration");
+    } else if (expr && !type_name) {
+        decl.set_type(t_void);
+        expr->accept(*this);
+        if (expr->get_type() != t_void)
+            error(decl.loc, "function with no explicit type must be void");
+    } else {
+        if (decl.is_external) {
+            /* accept the type of a non primitive declaration without
+             * visiting his expression (which is nullptr) */
+            decl.set_type(symbol_to_type(*type_name));
+        } else if (type_name) {
+            if (symbol_to_type(*type_name) != t_void)
+                error(decl.loc, "function type mismatch");
+            decl.set_type(t_void);
+        }
+    }
 }
+	
 
 void TypeChecker::visit(FunCall &funcall){
 	FunDecl *decl = &*funcall.get_decl();
