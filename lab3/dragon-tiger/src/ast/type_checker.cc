@@ -156,17 +156,19 @@ void TypeChecker::visit(FunDecl &fundecl){
 		expr->accept(*this);
 		//Si type est mentionné dans la declaration
           	if(type){
-                  //Prend le type de son expr
+                        fundecl.set_type(expr->get_type());
+                  	//Prend le type de son expr
                 	if(symbol_to_type(*type) == t_void)
                         	error("Variable cannot be void");
-                        fundecl.set_type(expr->get_type());
+                	if(symbol_to_type(*type) != expr->get_type())
+				error("Type declaration mismatch");
           	}
           	//Sinon doit etre void
           	else if (!type){
-                	Type type_expr = expr->get_type();
+			fundecl.set_type(t_void);
+			Type type_expr = expr->get_type();
                   	if(type_expr != t_void)
 				error("Function with no explicit type should be void declared");
-			fundecl.set_type(t_void);
           	}
 	}
 
@@ -179,11 +181,11 @@ void TypeChecker::visit(FunDecl &fundecl){
 			if(type){
 				if(symbol_to_type(*type) != t_void)
 					error("Expression incorrect");
-				fundecl.set_type(t_void);
-			}		
+			fundecl.set_type(t_void);		
+			}
 		}
-	}
 	fundecl_stack.pop_back();
+	}
 }
 
 void TypeChecker::visit(FunCall &funcall){
