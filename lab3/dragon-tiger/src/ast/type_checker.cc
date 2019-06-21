@@ -190,13 +190,7 @@ void TypeChecker::visit(FunDecl &fundecl){
 
 void TypeChecker::visit(FunCall &funcall){
 	FunDecl *decl = &*funcall.get_decl();
-    	for (int i = 0 ; i < (int) fundecl_stack.size() ; i++) {
-        	FunDecl *fundecl_tmp = fundecl_stack[i];
-        	if (decl == fundecl_tmp) {
-            		funcall.set_type(decl->get_type());
-			return;
-        	}
-    	}
+
 	//Si noeud pas encore analysé recursion
     	if (decl->get_type() == t_undef){
        	 	decl->accept(*this);
