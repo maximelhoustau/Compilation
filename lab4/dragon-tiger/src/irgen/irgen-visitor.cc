@@ -88,7 +88,38 @@ llvm::Value *IRGenerator::visit(const Identifier &id) {
 }
 
 llvm::Value *IRGenerator::visit(const IfThenElse &ite) {
-  UNIMPLEMENTED();
+	llvm::Value * ptr;
+	Type if_type = ite.get_type();
+	//Alloue la mémoire pour la pile
+	if( if_type != t_void)
+		ptr = alloca_in_entry(llvm_type(if_type), "Result");
+	//On construit les 3 blocs d'entrée
+	llvm::BasicBlock * block_then = llvm::BasicBlock::Create(Context, "Then", current_function);
+	llvm::BasicBlock * block_else = llvm::BasicBlock::Create(Context, "Else", current_function);
+	llvm::BasicBlock * block_end = llvm::BasicBlock::Create(Context, "End", current_function);
+	Builder.CreateCondBr(Builder.CreateIsNotNull(ite.get_condition().accept(*this)), block_then, block_else);
+	Builder.SetInsertPoint(block_then);
+	
+	llvm::Value * then_part = ite.get_then_part().accept(*this);
+	
+	if(if_type != t_void)
+		Builder.CreateStore(then_part, ptr);
+	
+	Builder.CreateBr(block_end);
+	Builder.SetInsertPoint(block_else);
+	llvm::Value * else_part = ite.get_else_part().accept(*this);
+	
+	if(if_type != t_void)
+		Builder.CreateStore(else_part, ptr);
+	
+	Builder.CreateBr(block_end);
+	Builder.SetInsertPoint(block_end);
+	
+	if(if_type != t_void)
+		return(Builder.CreateLoad(ptr));
+	else
+		return(nullptr);
+
 }
 
 llvm::Value *IRGenerator::visit(const VarDecl &decl) {
