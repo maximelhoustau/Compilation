@@ -45,10 +45,7 @@ const char *__chr(int32_t i) {
 }
 
 int32_t __size(const char *s) {
-  int32_t size = 0;
-  while(*s != '\0')
-	  size++;
-  return(size);
+  return(sizeof(s));
 }
 
 const char *__substring(const char *s, int32_t first, int32_t length) {
@@ -56,20 +53,20 @@ const char *__substring(const char *s, int32_t first, int32_t length) {
 }
 
 const char *__concat(const char *s1, const char *s2) {
-  error("UNIMPLEMENTED __concat");
+  return(strcat(s1, s2));
 }
 
 int32_t __strcmp(const char *s1, const char *s2) {
-  error("UNIMPLEMENTED __strcmp");
+  return(strcmp(s1, s2));
 }
 
 int32_t __streq(const char *s1, const char *s2) {
-  int32_t size = __size(s1);
-  for(int i = 0; i < size; i++){
-	  if(s1[i] != s2[i])
-		  return(0);
-  }
-  return(1);
+  int32_t result = __strcmp(s1, s2);
+  if(result == 0)
+	  return(1);
+  else
+	  return(0);
+
 }
 
 int32_t __not(int32_t i) {
