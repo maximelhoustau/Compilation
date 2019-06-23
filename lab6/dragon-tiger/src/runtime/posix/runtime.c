@@ -65,7 +65,7 @@ const char *__substring(const char *s, int32_t first, int32_t length) {
 	  error("Impossible to get a substring: index out of bounds or negative parameter");
   if(length == 0 && first == 0)
 	  return("");
-  else
+  else if(length == 0 && first != 0)
 	  error("Wrong usage of __substring function");
 
   char * string = malloc(length*sizeof(char));
