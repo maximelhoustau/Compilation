@@ -27,13 +27,17 @@ void __flush(void) {
 }
 
 const char *__getchar(void) {
-  char * character;
-  fgets(character, 100, stdin);
-  return(character);
+  char c = getchar();
+  char * character = malloc(sizeof(c));
+  *character = c;
+  if( c == EOF)
+	  return("");
+  else
+  	return(character);
 }
 
 int32_t __ord(const char *s) {
-  if(*s == "")
+  if(*s == 0)
 	  return(-1);
   return((int32_t)* s);
 }
@@ -54,7 +58,10 @@ int32_t __size(const char *s) {
 }
 
 const char *__substring(const char *s, int32_t first, int32_t length) {
-  error("UNIMPLEMENTED __substring");
+  int size = __size(s);
+  if( length < 0 || first < 0 || first + length > size)
+	  error("Impossible to get a substring: index out of bounds or negative parameter");
+
 }
 
 const char *__concat(const char *s1, const char *s2) {
