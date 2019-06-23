@@ -39,17 +39,15 @@ const char *__getchar(void) {
 int32_t __ord(const char *s) {
   if(*s == 0)
 	  return(-1);
-  return((int32_t)* s);
+  int32_t ho = (unsigned char) *s;
+  return(ho);
 }
 
 const char *__chr(int32_t i) {
   char * c = malloc(sizeof(char));
   if(i < 0 || i > 255)
-	  error("ASCII character must be between 0 and 255");
-  if(i < 128)
-	  *c = (char) i;
-  else
-	  *c = (char) 255-i ;
+	  error("ASCII character must be between 0 and 255"); 
+  *c = (char) i;
   return(c);
 }
 
