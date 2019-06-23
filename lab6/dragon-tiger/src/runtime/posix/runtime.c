@@ -33,12 +33,14 @@ const char *__getchar(void) {
 }
 
 int32_t __ord(const char *s) {
+  if(*s == "")
+	  return(-1);
   return((int32_t)* s);
 }
 
 const char *__chr(int32_t i) {
   if(i == 0)
-	  return('\0');
+	  return("");
   if(i < 0 || i > 255)
 	  error("ASCII character must be between 0 and 255");
   if(i > 128)
@@ -56,8 +58,6 @@ const char *__substring(const char *s, int32_t first, int32_t length) {
 }
 
 const char *__concat(const char *s1, const char *s2) {
-  int size_1 = __size(s1);
-  int size_2 = __size(s2);
   char * tmp ;
   tmp = malloc(sizeof(s1)+sizeof(s2));
   strcpy(tmp, s1);
