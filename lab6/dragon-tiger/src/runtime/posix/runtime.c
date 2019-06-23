@@ -27,8 +27,7 @@ void __flush(void) {
 }
 
 const char *__getchar(void) {
-  char character;
-  scanf("%c", &character);
+  char character = getchar();
   if(character != EOF)
 	 return(character);
   else
@@ -45,7 +44,7 @@ const char *__chr(int32_t i) {
 }
 
 int32_t __size(const char *s) {
-  return(sizeof(s));
+  return(strlen(s));
 }
 
 const char *__substring(const char *s, int32_t first, int32_t length) {
@@ -57,7 +56,13 @@ const char *__concat(const char *s1, const char *s2) {
 }
 
 int32_t __strcmp(const char *s1, const char *s2) {
-  return(strcmp(s1, s2));
+  int32_t result = strcmp(s1, s2);
+  if( result > 0)
+	  return(1);
+  else if(result < 0)
+	  return(-1);
+  else
+	  return(0);
 }
 
 int32_t __streq(const char *s1, const char *s2) {
