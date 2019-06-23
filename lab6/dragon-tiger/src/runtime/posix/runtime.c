@@ -46,7 +46,10 @@ const char *__chr(int32_t i) {
   char * c = malloc(sizeof(char));
   if(i < 0 || i > 255)
 	  error("ASCII character must be between 0 and 255");
-  *c = (char) i;
+  if(i < 128)
+	  *c = (char) i;
+  else
+	  *c = (char) 255-i ;
   return(c);
 }
 
