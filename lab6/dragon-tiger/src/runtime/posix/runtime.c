@@ -11,15 +11,15 @@ static void error(const char *msg) {
 }
 
 void __print_err(const char *s) {
-  fprintf(stderr, "%s\n", s);
+  fprintf(stderr, "%s", s);
 }
 
 void __print(const char *s) {
-  printf("%s\n", s);
+  printf("%s", s);
 }
 
 void __print_int(const int32_t i) {
-  printf("%i\n", i);
+  printf("%i", i);
 }
 
 void __flush(void) {
@@ -32,11 +32,12 @@ const char *__getchar(void) {
   if(character != EOF)
 	 return(character);
   else
-	  return("");
+	  return("\0");
 }
 
 int32_t __ord(const char *s) {
-  error("UNIMPLEMENTED __ord");
+  if(s != "\0")
+	  return((int32_t) s);
 }
 
 const char *__chr(int32_t i) {
