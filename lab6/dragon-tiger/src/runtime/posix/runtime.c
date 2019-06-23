@@ -27,8 +27,9 @@ void __flush(void) {
 }
 
 const char *__getchar(void) {
-  char character = getchar();
-  if(character != EOF)
+  char * character;
+  fgets(character, 1, stdin);
+  if(*character != EOF)
 	 return(character);
   else
 	  return("\0");
