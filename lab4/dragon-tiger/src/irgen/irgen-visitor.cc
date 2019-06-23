@@ -25,7 +25,8 @@ llvm::Value *IRGenerator::visit(const StringLiteral &literal) {
 }
 
 llvm::Value *IRGenerator::visit(const Break &b) {
-  UNIMPLEMENTED();
+	Builder.CreateBr(loop_exit_bbs[&*b.get_loop()]);
+	return(nullptr);;
 }
 
 llvm::Value *IRGenerator::visit(const BinaryOperator &op) {
@@ -203,9 +204,7 @@ llvm::Value *IRGenerator::visit(const WhileLoop &loop) {
 	
 	Builder.CreateBr(block_cond);
 	Builder.SetInsertPoint(block_end);
-	
 	return(nullptr);
-
 }
 
 llvm::Value *IRGenerator::visit(const ForLoop &loop) {
@@ -215,6 +214,7 @@ llvm::Value *IRGenerator::visit(const ForLoop &loop) {
       llvm::BasicBlock::Create(Context, "loop_body", current_function);
   llvm::BasicBlock *const end_block =
       llvm::BasicBlock::Create(Context, "loop_end", current_function);
+  loop_exit_bbs[&loop] = end_block;
   llvm::Value *const index = loop.get_variable().accept(*this);
   llvm::Value *const high = loop.get_high().accept(*this);
   Builder.CreateBr(test_block);
