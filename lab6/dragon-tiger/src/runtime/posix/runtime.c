@@ -11,23 +11,28 @@ static void error(const char *msg) {
 }
 
 void __print_err(const char *s) {
-  error("UNIMPLEMENTED __print_err");
+  fprintf(stderr, "%s\n", s);
 }
 
 void __print(const char *s) {
-  error("UNIMPLEMENTED __print");
+  printf("%s\n", s);
 }
 
 void __print_int(const int32_t i) {
-  error("UNIMPLEMENTED __print_int");
+  printf("%i\n", i);
 }
 
 void __flush(void) {
-  error("UNIMPLEMENTED __flush");
+  fflush(stdout);
 }
 
 const char *__getchar(void) {
-  error("UNIMPLEMENTED __getchar");
+  char character;
+  scanf("%c", &character);
+  if(character != EOF)
+	 return(character);
+  else
+	  return("");
 }
 
 int32_t __ord(const char *s) {
