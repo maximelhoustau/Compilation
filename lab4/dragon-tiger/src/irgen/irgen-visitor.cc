@@ -185,7 +185,9 @@ llvm::Value *IRGenerator::visit(const ForLoop &loop) {
 }
 
 llvm::Value *IRGenerator::visit(const Assign &assign) {
-  UNIMPLEMENTED();
+	llvm::Value * ptr = allocations[&*assign.get_lhs().get_decl()];
+	llvm::Value * value = assign.get_rhs().accept(*this);
+	return(Builder.CreateStore(value, ptr));
 }
 
 } // namespace irgen
