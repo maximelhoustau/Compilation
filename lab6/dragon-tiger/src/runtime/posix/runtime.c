@@ -43,14 +43,16 @@ int32_t __ord(const char *s) {
 }
 
 const char *__chr(int32_t i) {
+  char * c = (char *) i;
+  char * c_out = (char *) 255-i ;
   if(i == 0)
 	  return("");
   if(i < 0 || i > 255)
 	  error("ASCII character must be between 0 and 255");
   if(i > 128)
-	  return( (char*) 255 - i);
+	  return( *c);
   else
-	  return( (char*) 0 -(-i));
+	  return( *c_out);
 }
 
 int32_t __size(const char *s) {
