@@ -28,7 +28,7 @@ void __flush(void) {
 
 const char *__getchar(void) {
   char * character;
-  fgets(character, 1, stdin);
+  fgets(character, 100, stdin);
   return(character);
 }
 
@@ -56,7 +56,10 @@ const char *__substring(const char *s, int32_t first, int32_t length) {
 }
 
 const char *__concat(const char *s1, const char *s2) {
+  int size_1 = __size(s1);
+  int size_2 = __size(s2);
   char * tmp ;
+  tmp = malloc(sizeof(s1)+sizeof(s2));
   strcpy(tmp, s1);
   return(strcat(tmp, s2));
 }
