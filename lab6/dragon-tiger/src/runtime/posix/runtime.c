@@ -29,15 +29,14 @@ void __flush(void) {
 const char *__getchar(void) {
   char * character;
   fgets(character, 1, stdin);
-  if(*character != EOF)
-	 return(character);
-  else
-	  return("\0");
+  return(character);
 }
 
 int32_t __ord(const char *s) {
-  if(s != "\0")
-	  return((int32_t) s);
+  if(*s == '\0')
+	  return(0);
+  else
+	  return((int32_t)* s);
 }
 
 const char *__chr(int32_t i) {
@@ -53,7 +52,9 @@ const char *__substring(const char *s, int32_t first, int32_t length) {
 }
 
 const char *__concat(const char *s1, const char *s2) {
-  return(strcat(s1, s2));
+  char * tmp ;
+  strcpy(tmp, s1);
+  return(strcat(tmp, s2));
 }
 
 int32_t __strcmp(const char *s1, const char *s2) {
