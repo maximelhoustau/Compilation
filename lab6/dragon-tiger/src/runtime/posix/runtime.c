@@ -43,16 +43,11 @@ int32_t __ord(const char *s) {
 }
 
 const char *__chr(int32_t i) {
-  char * c = (char *) i;
-  char * c_out = (char *) 255-i ;
-  if(i == 0)
-	  return("");
+  char * c = malloc(sizeof(char));
   if(i < 0 || i > 255)
 	  error("ASCII character must be between 0 and 255");
-  if(i > 128)
-	  return( *c);
-  else
-	  return( *c_out);
+  *c = (char) i;
+  return(c);
 }
 
 int32_t __size(const char *s) {
