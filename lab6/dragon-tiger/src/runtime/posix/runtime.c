@@ -33,14 +33,18 @@ const char *__getchar(void) {
 }
 
 int32_t __ord(const char *s) {
-  if(*s == '\0')
-	  return(0);
-  else
-	  return((int32_t)* s);
+  return((int32_t)* s);
 }
 
 const char *__chr(int32_t i) {
-  error("UNIMPLEMENTED __chr");
+  if(i == 0)
+	  return('\0');
+  if(i < 0 || i > 255)
+	  error("ASCII character must be between 0 and 255");
+  if(i > 128)
+	  return( (char*) 255 - i);
+  else
+	  return( (char*) 0 -(-i));
 }
 
 int32_t __size(const char *s) {
