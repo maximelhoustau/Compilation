@@ -142,35 +142,36 @@ void TypeChecker::visit(VarDecl &decl){
 }
 
 void TypeChecker::visit(FunDecl &decl){	
-	if(decl.get_type() != t_undef)
-		return;
-	auto params = decl.get_params();
-	auto expr = decl.get_expr();
-	for(auto vardecl : params){
-		if(vardecl->type_name)
-			error("Type of parameter not define");
-		vardecl->set_type(symbol_to_type(*vardecl->type_name));
-	}
-
-	if(decl.is_external)
-		decl.set_type(symbol_to_type(*decl.type_name));
-
-	if(!decl.type_name){
-		decl.set_type(t_void);
-		expr->accept(*this);
-		if(expr->get_type() != t_void)
-			error("This function must be void");
-	}
-	
-	if(!decl.is_external){
-		if(symbol_to_type(*decl.type_name) == t_void)
-			error("This function can't be void");
-		decl.set_type(symbol_to_type(*decl.type_name));
-		expr->accept(*this);
-		if(expr->get_type() != symbol_to_type(*decl.type_name))
-			error("Expression and declaration must have the same type");
-	}
-
+    if (decl.get_type() != t_undef) return;
+    
+    std::vector<VarDecl *> & vars = decl.get_params();
+    int n = vars.size();
+    for(int i = 0 ; i < n ; i++) {
+        vars[i]->accept(*this);
+    }
+    optional<Symbol> type_name = decl.type_name;
+    optional<Expr &> expr = decl.get_expr();
+    if(expr && type_name) {
+        decl.set_type(symbol_to_type(*type_name));
+        expr->accept(*this);
+        if(symbol_to_type(*type_name) == t_void)
+            error(decl.loc, "explicit void type name is disallowed in non-primitive function declaration");
+        if (symbol_to_type(*type_name) != expr->get_type())
+            error(decl.loc, "mismatch type declaration");
+    } else if (expr && !type_name) {
+        decl.set_type(t_void);
+        expr->accept(*this);
+        if (expr->get_type() != t_void)
+            error(decl.loc, "function with no explicit type must be void");
+    } else {
+        if (decl.is_external) {
+            decl.set_type(symbol_to_type(*type_name));
+        } else if (type_name) {
+            if (symbol_to_type(*type_name) != t_void)
+                error(decl.loc, "function type mismatch");
+            decl.set_type(t_void);
+        }
+    }
 }
 	
 
