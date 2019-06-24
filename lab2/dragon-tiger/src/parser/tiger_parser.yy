@@ -105,6 +105,8 @@ using utils::nl;
 
 // Declare precedence rules
 
+%precedence THEN;
+%precedence ELSE;
 %nonassoc FUNCTION VAR TYPE DO OF ASSIGN;
 %left OR;
 %left AND;
