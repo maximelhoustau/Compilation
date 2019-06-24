@@ -82,7 +82,7 @@ void TypeChecker::visit(Identifier &id){
 	optional<VarDecl &> decl = id.get_decl();
 	//Prend le type de sa declaration
 	if(decl){
-		std::cerr << decl->get_type() << "\n";
+		//std::cerr << decl->get_type() << "\n";
 		id.set_type(decl->get_type());
 	}
 	else
@@ -250,14 +250,10 @@ void TypeChecker::visit(Break &br){
 }
 
 void TypeChecker::visit(Assign &assign){
-	std::cerr << "Visit Assign" << "\n";
-	Identifier * identifier = dynamic_cast<Identifier *>(&assign.get_lhs());
-        if(identifier == nullptr)
-                error(identifier->loc, "This is not an identifier");
-        identifier->accept(*this);
-        Type type_l = identifier->get_decl()->get_type();
+        assign.get_lhs().accept(*this);
         assign.get_rhs().accept(*this);
 	Type type_r = assign.get_rhs().get_type();
+	Type type_l = assign.get_lhs().get_type();
 	//Verification des types de l'assignement
 	if(type_l == type_r)
 		assign.set_type(t_void);
