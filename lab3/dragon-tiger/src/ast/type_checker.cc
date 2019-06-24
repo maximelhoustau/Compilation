@@ -10,6 +10,9 @@ using utils::non_fatal_error;
 namespace ast{
 namespace type_checker{
 
+void TypeChecker::analyze_program(FunDecl &main) {
+	main.accept(*this);
+}
 void TypeChecker::visit(IntegerLiteral &id){
 	//Int
 	//std::cerr << "Visit Integer" << "\n";
@@ -142,13 +145,17 @@ void TypeChecker::visit(VarDecl &decl){
 }
 
 void TypeChecker::visit(FunDecl &decl){	
+    fundecl_stack.push_back(&decl);
+    /* if this function has been visited already by a funcall */
     if (decl.get_type() != t_undef) return;
-    
+    /* visit parameters */
     std::vector<VarDecl *> & vars = decl.get_params();
     int n = vars.size();
     for(int i = 0 ; i < n ; i++) {
         vars[i]->accept(*this);
     }
+    /* visit expression and check if it match the explicit
+     * paramter if any */
     optional<Symbol> type_name = decl.type_name;
     optional<Expr &> expr = decl.get_expr();
     if(expr && type_name) {
@@ -165,6 +172,8 @@ void TypeChecker::visit(FunDecl &decl){
             error(decl.loc, "function with no explicit type must be void");
     } else {
         if (decl.is_external) {
+            /* accept the type of a non primitive declaration without
+             * visiting his expression (which is nullptr) */
             decl.set_type(symbol_to_type(*type_name));
         } else if (type_name) {
             if (symbol_to_type(*type_name) != t_void)
@@ -172,29 +181,41 @@ void TypeChecker::visit(FunDecl &decl){
             decl.set_type(t_void);
         }
     }
+	fundecl_stack.pop_back();
+
 }
 	
 
 void TypeChecker::visit(FunCall &funcall){
-	FunDecl *decl = &*funcall.get_decl();
+	//std::cerr <<  "visit FunCall\n";
+    FunDecl *funDecl = &*funcall.get_decl();
+    int n_recursive = fundecl_stack.size();
+    for (int i = 0 ; i < n_recursive ; i++) {
+        FunDecl *current_funDecl = fundecl_stack[i];
+        if (funDecl == current_funDecl) {
+            /* This is a recusive call */
+            funcall.set_type(funDecl->get_type());
+            return;
+        }
+    }
+    if (funDecl->get_type() == t_undef){
+        /* function not declared yet */
+        funDecl->accept(*this);
+    }
+    std::vector<VarDecl *> decl_params = funDecl->get_params();
+    std::vector<Expr *> call_exprs = funcall.get_args();
+    /* check number of parameters and their types */
+    int n_call = call_exprs.size();
+    int n_decl = decl_params.size();
+    if (n_call != n_decl)
+        error(funcall.loc, "The number of parameters mismatch the previous declaration");
+    for (int i = 0 ; i < n_call ; i++){
+        call_exprs[i]->accept(*this);
+        if (call_exprs[i]->get_type() != decl_params[i]->get_type())
+            error(funcall.loc, "parameters type mismatch from the declaration");
+    }
+    funcall.set_type(funDecl->get_type());
 
-	//Si noeud pas encore analysé recursion
-    	if (decl->get_type() == t_undef){
-       	 	decl->accept(*this);
-    	}
-
-	//std::cerr << "Visit FunCall" << "\n";
-	std::vector<Expr *> &args = funcall.get_args();
-	std::vector<VarDecl *> &params = decl->get_params();
-	//Check de la taille et de la validité des affectations des parametres de la fonction
-	if(args.size() != params.size())
-		error("Wrong number of arguments");
- 	for (int i = 0 ; i < (int) args.size() ; i++){
-        	args[i]->accept(*this);
-      	  	if (args[i]->get_type() != params[i]->get_type())
-            		error("Parameter declaration error");
-    	}
-    	funcall.set_type(decl->get_type());
 }
 
 void TypeChecker::visit(WhileLoop &loop){

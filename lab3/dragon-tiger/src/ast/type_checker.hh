@@ -10,6 +10,7 @@ class TypeChecker : public ASTVisitor {
 	std::vector<FunDecl *> fundecl_stack;	
 public:
 	TypeChecker() {};
+	virtual void analyze_program(FunDecl &);	
 	Type symbol_to_type(Symbol type_s);
   	virtual void visit(IntegerLiteral &);
   	virtual void visit(StringLiteral &);
