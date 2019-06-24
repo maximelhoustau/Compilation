@@ -125,11 +125,8 @@ decl: varDecl { $$ = $1; }
    | funcDecl { $$ = $1; }
 ;
 
-if_stmt: IF expr THEN expr elsePart {$$ = new IfThenElse(@2, $2, $4, $5); }
-;
-
-elsePart: {$$ = new Sequence(nl, std::vector<Expr *>()); }
-	| ELSE expr {$$ = $2; }
+if_stmt: IF expr THEN expr ELSE expr {$$ = new IfThenElse(@2, $2, $4, $6); } 
+       | IF expr THEN expr {$$ = new IfThenElse(@2, $2, $4, new Sequence(nl, std::vector<Expr *>()));}
 ;
 
 expr: stringExpr { $$ = $1; }
