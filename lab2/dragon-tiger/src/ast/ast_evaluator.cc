@@ -38,13 +38,10 @@ int32_t ASTEvaluator::visit(const Sequence &seqExpr) {
   const auto exprs = seqExpr.get_exprs();
   if(exprs.size() == 0)
 	  utils::error("Error: the sequence is empty");
-  for (auto expr = exprs.cbegin(); expr != exprs.cend(); expr++) {
-    if (expr != exprs.cend())
-	    return( (*expr)->accept(*this));
-    else
-	    (*expr)->accept(*this);
+  for (auto expr = exprs.begin(); expr != exprs.end(); expr++) {
+	  (*expr)->accept(*this);
   }
-  return(-1);
+  return(exprs.back()->accept(*this));
 }
 
 int32_t ASTEvaluator::visit(const IfThenElse &ite) {
