@@ -1,3 +1,3 @@
-# My new project
+# Tiger Compiler Project
 
-This is the default README.md. Please edit me.
+Building a whole compiler for the Tiger language.
